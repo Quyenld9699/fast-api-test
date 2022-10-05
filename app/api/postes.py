@@ -11,25 +11,29 @@ router = APIRouter(
 )
 
 # Get - all
-@router.get("/" )
+
+
+@router.get("/")
 def get_posts():
     return {
         "data": posts
     }
 
+
 # Get single post by (id)
-@router.get("/{id}" )
+@router.get("/{id}")
 def get_one_post(id: int):
     if id > len(posts):
         return {
             "error": "Post with this id not exist."
         }
-    
+
     for post in posts:
         if post["id"] == id:
             return {
                 "data": post
             }
+
 
 @router.post("/")
 def add_post(post: PostForPostSchema):

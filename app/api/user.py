@@ -10,6 +10,8 @@ router = APIRouter(
 )
 
 # normal funtion
+
+
 def check_user(data: UserLoginSchema):
     for user in users:
         if user.email == data.email and user.password == data.password:
@@ -17,17 +19,19 @@ def check_user(data: UserLoginSchema):
     return False
 
 # User sign up
+
+
 @router.post("/sign-up")
 def user_sign_up(user: UserSchema = Body(default=None)):
     users.append(user)
     return signJWT(user.email)
-    
+
 
 @router.post("/login")
-def user_login(user:UserLoginSchema = Body(default=None)):
+def user_login(user: UserLoginSchema = Body(default=None)):
     if check_user(user):
         return signJWT(user.email)
     else:
         return {
-            "error" : "Invalid login details"
+            "error": "Invalid login details"
         }

@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(postes.router)
 app.include_router(user.router)
 
+
 # Get - for testing
 @app.get("/", tags=["test"])
 def greet():
