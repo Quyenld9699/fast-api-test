@@ -2,6 +2,9 @@ from fastapi import APIRouter, Body
 from app.auth.jwt_handler import signJWT
 from app.constant.data import users
 from app.models.model import UserLoginSchema, UserSchema
+from database.index import db
+
+UserCollection = db.user
 
 router = APIRouter(
     prefix="/users",
@@ -13,9 +16,10 @@ router = APIRouter(
 
 
 def check_user(data: UserLoginSchema):
-    for user in users:
-        if user.email == data.email and user.password == data.password:
-            return True
+    user = UserCollection.find_one({"email": data.email, "password": data.password})
+    if user:
+        # print(user)
+        return True
     return False
 
 # User sign up
@@ -23,7 +27,7 @@ def check_user(data: UserLoginSchema):
 
 @router.post("/sign-up")
 def user_sign_up(user: UserSchema = Body(default=None)):
-    users.append(user)
+    UserCollection.insert_one(user.dict())
     return signJWT(user.email)
 
 
@@ -35,3 +39,8 @@ def user_login(user: UserLoginSchema = Body(default=None)):
         return {
             "error": "Invalid login details"
         }
+
+
+@router.post("/list-all")
+def user_login():
+    return UserCollection.find()
