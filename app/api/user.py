@@ -1,8 +1,10 @@
+from array import array
 from fastapi import APIRouter, Body
 from app.auth.jwt_handler import signJWT
 from app.constant.data import users
 from app.models.model import UserLoginSchema, UserSchema
 from database.index import db
+from bson import ObjectId
 
 UserCollection = db.user
 
@@ -41,6 +43,11 @@ def user_login(user: UserLoginSchema = Body(default=None)):
         }
 
 
-@router.post("/list-all")
-def user_login():
-    return UserCollection.find()
+@router.post("/list-all", response_model=list[UserSchema])
+async def get_list_user():
+    dataCollection = UserCollection.find({})
+    result = []
+    for item in dataCollection:
+        result.append({"id": str(item["_id"]), **(UserSchema(**item).dict())})
+
+    return result
