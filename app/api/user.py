@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Body
 from app.auth.jwt_handler import signJWT
-from app.models.model import UserLoginSchema, UserSchema
+from app.models.model import UserGetingSchema, UserLoginSchema, UserSchema
 from database.index import db
 from passlib.context import CryptContext
+from bson import ObjectId
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -49,11 +50,24 @@ def user_login(user: UserLoginSchema = Body(default=None)):
         }
 
 
-@router.post("/list-all", response_model=list[UserSchema])
+@router.post("/list-all", response_model=list[UserGetingSchema])
 async def get_list_user():
     dataCollection = UserCollection.find({})
     result = []
     for item in dataCollection:
-        result.append({"id": str(item["_id"]), **(UserSchema(**item).dict())})
+        # print(item)
+        result.append(UserGetingSchema(**item).dict())
+        # result.append({"id": str(item["_id"]), **(UserSchema(**item).dict())})
 
     return result
+
+
+@router.post("/{id}", response_model=UserGetingSchema)
+async def get_user_by_id(id: str):
+    dataCollection = UserCollection.find_one({"_id": ObjectId(id)})
+    if dataCollection:
+        return dataCollection
+        # return UserGetingSchema(**dataCollection)
+    return {
+        "error": "Post with this id not exist."
+    }

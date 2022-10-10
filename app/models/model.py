@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr
+from .PyObjectId import PyObjectId
+from bson import ObjectId
 
 
 class PostSchema(BaseModel):
@@ -34,6 +36,15 @@ class UserSchema(BaseModel):
                 "password": "123134"
             }
         }
+
+
+class UserGetingSchema(UserSchema):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True  # required for the _id
+        json_encoders = {ObjectId: str}
 
 
 class UserLoginSchema(BaseModel):
