@@ -1,10 +1,11 @@
-from array import array
 from fastapi import APIRouter, Body
 from app.auth.jwt_handler import signJWT
-from app.constant.data import users
 from app.models.model import UserLoginSchema, UserSchema
 from database.index import db
-from bson import ObjectId
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 UserCollection = db.user
 
@@ -17,10 +18,15 @@ router = APIRouter(
 # normal funtion
 
 
-def check_user(data: UserLoginSchema):
-    user = UserCollection.find_one({"email": data.email, "password": data.password})
-    if user:
-        # print(user)
+def hash_password(password):
+    return pwd_context.hash(password)
+
+
+def check_user(data_post: UserLoginSchema):
+    user = UserCollection.find_one({"email": data_post.email})
+    # typeof user is dict => dùng biến ở dạng variable[key]
+    # object class thì mới truy cập bằng variable.key
+    if user and pwd_context.verify(data_post.password, user["password"]):
         return True
     return False
 
@@ -29,7 +35,7 @@ def check_user(data: UserLoginSchema):
 
 @router.post("/sign-up")
 def user_sign_up(user: UserSchema = Body(default=None)):
-    UserCollection.insert_one(user.dict())
+    UserCollection.insert_one({**user.dict(), "password": hash_password(user.password)})
     return signJWT(user.email)
 
 

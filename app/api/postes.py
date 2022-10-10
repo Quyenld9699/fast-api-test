@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from app.auth.jwt_bearer import jwtBearer
 from app.models.model import PostForPostSchema, PostSchema
 from app.constant.data import posts
